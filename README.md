@@ -54,3 +54,6 @@ pip install -r requirements.txt
     groupbunk.py -u yourusername@emial.com -p yourpassword -exgrp excludegroups.txt
     ```
     *Only group name per line is allowed* 
+    
+## LICENSE
+[MIT](https://github.com/shine-jayakumar/groupbunk-fb/blob/master/LICENSE)
