@@ -1,4 +1,6 @@
 # GroupBunk
+![MIT License](https://img.shields.io/github/license/shine-jayakumar/Covid19-Exploratory-Analysis-With-SQL)
+
 ### Leave your Facebook groups quietly
 
 GroupBunk is a command-line python script that allows you to leave Facebook groups.
