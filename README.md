@@ -3,6 +3,13 @@
 
 GroupBunk is a command-line python script that allows you to leave Facebook groups.
 
+**Table of Contents**
+- [Features](#Features "Features")
+- [Requirements](#Requirements "Requirements")
+- [Installation](#Installation "Installation")
+- [Options](#Options "Options")
+- [Usage](#Usage "Usage")
+
 ## Features
 - Get names of groups you've joined
 - Specify groups you want to keep
@@ -12,7 +19,7 @@ GroupBunk is a command-line python script that allows you to leave Facebook grou
 - Python 3
 - Chrome Browser
 
-View the requirements.txt
+View the [requirements.txt](https://github.com/shine-jayakumar/Rubber-Price-Telegram-Bot/blob/master/requirements.txt)
 
 ## Installation
 ```sh
