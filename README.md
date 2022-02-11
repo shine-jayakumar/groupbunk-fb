@@ -39,21 +39,23 @@ pip install -r requirements.txt
 | -dumpgrps | Only dumps group names into a file (optional) |
 
 ## Usage
-- To leave all groups
-    ```
-    python groupbunk.py -u yourusername@email.com -p yourpassword
-    ```
-- To view all groups you're member of 
-    ```
-    groupbunk.py -u yourusername@emial.com -p yourpassword -dumpgrps allgroups.txt
-    ```
-    *dumps group names to allgroups.txt*
+**To leave all groups**
+
+```
+python groupbunk.py -u yourusername@email.com -p yourpassword
+```
     
-- To specify groups you don't want to leave
-    ```
-    groupbunk.py -u yourusername@emial.com -p yourpassword -exgrp excludegroups.txt
-    ```
-    *Only group name per line is allowed* 
+**To view all groups you're member of**
+```
+groupbunk.py -u yourusername@emial.com -p yourpassword -dumpgrps allgroups.txt
+```
+*dumps group names to allgroups.txt*
+    
+**To specify groups you don't want to leave**
+```
+groupbunk.py -u yourusername@emial.com -p yourpassword -exgrp excludegroups.txt
+```
+*Only one group name per line is allowed* 
     
 ## LICENSE
 [MIT](https://github.com/shine-jayakumar/groupbunk-fb/blob/master/LICENSE)
