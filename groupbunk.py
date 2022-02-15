@@ -1,5 +1,5 @@
 """
-GroupBunk v.1
+GroupBunk v.1.2
 
 Leave your Facebook groups quietly 
 
@@ -9,49 +9,33 @@ Github: https://github.com/shine-jayakumar
 LICENSE: MIT
 """
 
+from ast import arguments
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import StaleElementReferenceException
 from webdriver_manager.chrome import ChromeDriverManager
-
+import argparse
 import logging
 import sys
 from datetime import datetime
 import time
-
 from groupfuncs import *
-import param_funcs as pf
+import os
 
-start_time = time.time()
+# suppress webdriver manager logs
+os.environ['WDM_LOG_LEVEL'] = '0'
 
 IGNORE_DIV = ['your feed', 'discover', 'your notifications']
-
 FB_GROUP_URL = 'https://www.facebook.com/groups/feed/'
 
 
-DEFAULT_PARAMS = {
-    "EXCLUDE_GROUPS_FNAME": None,
-    "ELEMENT_LOAD_TIMEOUT": 30,
-    "GROUP_NAME_LOAD_TIME": 4,
-    "MAX_RECAPTURE_RETRIES":5,
-    "DUMP_GROUPS_FNAME": None,
-    "FB_USERNAME": None,
-    "FB_PASSWORD": None,
-}
-
-
-if len(sys.argv) < 2 or len(sys.argv) % 2 == 0 or not pf.check_params_present(['-u','-p'], sys.argv):
-    pf.display_help()
-    sys.exit()
-
-#loading command line arguments
-pf.load_params(sys.argv, DEFAULT_PARAMS)
-
-
 def display_intro():
+    '''
+    Displays intro of the script
+    '''
     intro = """
-    GroupBunk v.1
+    GroupBunk v.1.2
     Leave your Facebook groups quietly
 
     Author: Shine Jayakumar
@@ -61,61 +45,115 @@ def display_intro():
     print(intro)
 
 
+def time_taken(start_time, logger):
+    '''
+    Calculates the time difference from now and start time
+    '''
+    end_time = time.time()
+    logger.info(f"Total time taken: {round(end_time - start_time, 4)} seconds")
+
+
+def cleanup_and_quit(driver):
+    '''
+    Quits driver and exits the script
+    '''
+    if driver:
+        driver.quit()
+    sys.exit()
+
+
+
+start_time = time.time()
+
+# ====================================================
+# Argument parsing
+# ====================================================
+description = "Leave your Facebook groups quietly"
+usage = "groupbunk.py username password [-h] [-eg FILE] [-et TIMEOUT] [-sw WAIT] [-gr RETRYCOUNT] [-dg FILE]"
+examples="""
+Examples:
+groupbunk.py bob101@email.com bobspassword101
+groupbunk.py bob101@email.com bobspassword101 -eg keepgroups.txt
+groupbunk.py bob101@email.com bobspassword101 -et 60 --scrollwait 10 -gr 7
+groupbunk.py bob101@email.com bobspassword101 --dumpgroups mygroup.txt --groupretry 5
+"""
+parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description=description,
+    usage=usage,
+    epilog=examples,
+    prog='groupbunk')
+
+# required arguments
+parser.add_argument('username', type=str, help='Facebook username')
+parser.add_argument('password', type=str, help='Facebook password')
+
+# optional arguments
+parser.add_argument('-eg', '--exgroup',    type=str, metavar='', help='file with group names to exclude (one group per line)')
+parser.add_argument('-et', '--eltimeout',  type=int, metavar='', help='max timeout for elements to be loaded', default=30)
+parser.add_argument('-sw', '--scrollwait', type=int, metavar='', help='time to wait after each scroll', default=4)
+parser.add_argument('-gr', '--groupretry', type=int, metavar='', help='retry count while recapturing group names', default=5)
+parser.add_argument('-dg', '--dumpgroups', type=str, metavar='', help='do not leave groups; only dump group names to a file')
+parser.add_argument('-v', '--version', action='version', version='%(prog)s v.1.2')
+args = parser.parse_args()
+# ====================================================
+
+
 # Setting up logger
 # =====================================================
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s:%(name)s:%(lineno)d:%(levelname)s:%(message)s")
-file_handler = logging.FileHandler(
-    f'groupbunk_{datetime.now().strftime("%d_%m_%Y__%H_%M_%S")}.log', 'w', 'utf-8')
+file_handler = logging.FileHandler(f'groupbunk_{datetime.now().strftime("%d_%m_%Y__%H_%M_%S")}.log', 'w', 'utf-8')
 file_handler.setFormatter(formatter)
 
+stdout_formatter = logging.Formatter("[*] => %(message)s")
 stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setFormatter(formatter)
+stdout_handler.setFormatter(stdout_formatter)
 
 logger.addHandler(file_handler)
 logger.addHandler(stdout_handler)
 #=======================================================
 
 
-
-display_intro()
-logger.info("script started")
-
-# loading group names to be excluded
-if DEFAULT_PARAMS['EXCLUDE_GROUPS_FNAME']:
-    logger.info("Loading group names to be excluded")
-    excluded_group_names = get_excluded_group_names(DEFAULT_PARAMS['EXCLUDE_GROUPS_FNAME'])
-    IGNORE_DIV.extend(excluded_group_names)
-
-
-options = Options()
-# supresses notifications
-options.add_argument("--disable-notifications")
-
-logger.info("Downloading latest chrome webdriver")
-# UNCOMMENT TO SPECIFY DRIVER LOCATION
-# driver = webdriver.Chrome("D:/chromedriver/98/chromedriver.exe", options=options)
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-
-if not driver:
-    logger.critical('Unable to download chrome webdriver for your version of Chrome browser')
-    sys.exit()
-
-logger.info("Successfully downloaded chrome webdriver")
-
-wait = WebDriverWait(driver, DEFAULT_PARAMS['ELEMENT_LOAD_TIMEOUT'])
-
 try:
+
+    display_intro()
+    logger.info("script started")
+
+    # loading group names to be excluded
+    if args.exgroup:
+        logger.info("Loading group names to be excluded")
+        excluded_group_names = get_excluded_group_names(args.exgroup)
+        IGNORE_DIV.extend(excluded_group_names)
+
+    options = Options()
+    # supresses notifications
+    options.add_argument("--disable-notifications")
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    options.add_argument("--log-level=3")
+
+    logger.info("Downloading latest chrome webdriver")
+    # UNCOMMENT TO SPECIFY DRIVER LOCATION
+    # driver = webdriver.Chrome("D:/chromedriver/98/chromedriver.exe", options=options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+
+    if not driver:
+        raise Exception('Unable to download chrome webdriver for your version of Chrome browser')
+
+    logger.info("Successfully downloaded chrome webdriver")
+
+    wait = WebDriverWait(driver, args.eltimeout)
+
     logger.info(f"Opening FB GROUPS URL: {FB_GROUP_URL}")
     driver.get(FB_GROUP_URL)
 
     logger.info("Sending username")
-    wait.until(EC.visibility_of_element_located((By.ID, 'email'))).send_keys(DEFAULT_PARAMS['FB_USERNAME'])
+    wait.until(EC.visibility_of_element_located((By.ID, 'email'))).send_keys(args.username)
 
     logger.info("Sending password")
-    driver.find_element(By.ID, 'pass').send_keys(DEFAULT_PARAMS['FB_PASSWORD'])
+    driver.find_element(By.ID, 'pass').send_keys(args.password)
 
     logger.info("Clicking on Log In")
     wait.until(EC.presence_of_element_located((By.ID, 'loginbutton'))).click()
@@ -124,8 +162,7 @@ try:
     group_links = get_group_link_elements(driver, wait)
 
     if not group_links:
-        logger.error("Unable to find links")
-        sys.exit()
+        raise Exception("Unable to find links")
 
     no_of_currently_loaded_links = 0
 
@@ -135,21 +172,21 @@ try:
     # scroll until no new group links are loaded
     while len(group_links) > no_of_currently_loaded_links:
         no_of_currently_loaded_links = len(group_links)
-        print(f"Updated link count: {no_of_currently_loaded_links-3}")
+        logger.info(f"Updated link count: {no_of_currently_loaded_links-3}")
         scroll_into_view(driver, group_links[no_of_currently_loaded_links-1])
-        time.sleep(DEFAULT_PARAMS['GROUP_NAME_LOAD_TIME'])
+        time.sleep(args.scrollwait)
         # re-capturing
         group_links = get_group_link_elements(driver, wait)  
 
     logger.info(f"Total number of links found: {len(group_links)-3}")
      
     # only show the group names and exit
-    if DEFAULT_PARAMS['DUMP_GROUPS_FNAME']:
-        logger.info('ONLY SHOW GROUPS parameter set to True')
-        logger.info(f"Dumping group names to: {DEFAULT_PARAMS['DUMP_GROUPS_FNAME']}")
-        dump_groups(group_links, DEFAULT_PARAMS['DUMP_GROUPS_FNAME'])
-        driver.quit()
-        sys.exit()
+    if args.dumpgroups:
+        logger.info('Only dumping group names to file. Not leaving groups')
+        logger.info(f"Dumping group names to: {args.dumpgroups}")
+        dump_groups(group_links, args.dumpgroups)
+        time_taken(start_time, logger)
+        cleanup_and_quit(driver)
     
     # first 3 links are for Your feed, 'Discover, Your notifications
     i = 0
@@ -181,7 +218,7 @@ try:
                 
         except StaleElementReferenceException:
             logger.error('Captured group elements gone stale. Recapturing...')
-            if no_of_retries > DEFAULT_PARAMS['MAX_RECAPTURE_RETRIES']:
+            if no_of_retries > args.groupretry:
                 logger.error('Reached max number of retry attempts')
                 break
             save_state = i
@@ -205,7 +242,5 @@ except Exception as ex:
     logger.error(f"Script ended with exception: {ex}")
 
 finally:
-    end_time = time.time()
-    logger.info(f"Total time taken: {round(end_time - start_time, 4)} seconds")
-    if driver:
-        driver.quit()
+    time_taken(start_time, logger)
+    cleanup_and_quit(driver)

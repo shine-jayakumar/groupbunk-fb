@@ -27,7 +27,7 @@ def scroll_into_view(driver, element):
     try:
         driver.execute_script("arguments[0].scrollIntoView(true);", element)
     except:
-        print("Error while scrolling to the element")
+        print("[*] => (scroll_into_view) - Error while scrolling to the element")
 
 
 def leave_group(wait):
