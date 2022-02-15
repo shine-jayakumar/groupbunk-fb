@@ -87,7 +87,7 @@ parser.add_argument('username', type=str, help='Facebook username')
 parser.add_argument('password', type=str, help='Facebook password')
 
 # optional arguments
-parser.add_argument('-eg', '--exgroup',    type=str, metavar='', help='file with group names to exclude (one group per line)')
+parser.add_argument('-eg', '--exgroups',    type=str, metavar='', help='file with group names to exclude (one group per line)')
 parser.add_argument('-et', '--eltimeout',  type=int, metavar='', help='max timeout for elements to be loaded', default=30)
 parser.add_argument('-sw', '--scrollwait', type=int, metavar='', help='time to wait after each scroll', default=4)
 parser.add_argument('-gr', '--groupretry', type=int, metavar='', help='retry count while recapturing group names', default=5)
@@ -121,9 +121,9 @@ try:
     logger.info("script started")
 
     # loading group names to be excluded
-    if args.exgroup:
+    if args.exgroups:
         logger.info("Loading group names to be excluded")
-        excluded_group_names = get_excluded_group_names(args.exgroup)
+        excluded_group_names = get_excluded_group_names(args.exgroups)
         IGNORE_DIV.extend(excluded_group_names)
 
     options = Options()
