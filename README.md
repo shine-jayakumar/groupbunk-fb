@@ -44,6 +44,7 @@ Optional arguments
 | -sw', '--scrollwait | time to wait after each scroll |
 | -gr', '--groupretry | retry count while recapturing group names |
 | -dg', '--dumpgroups | do not leave groups; only dump group names to a file |
+| -v, --version | show program's version number and exit |
 
 ## Usage
 **To leave all groups**
