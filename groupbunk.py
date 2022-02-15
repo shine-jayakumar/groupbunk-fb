@@ -9,7 +9,6 @@ Github: https://github.com/shine-jayakumar
 LICENSE: MIT
 """
 
-from ast import arguments
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
@@ -60,7 +59,6 @@ def cleanup_and_quit(driver):
     if driver:
         driver.quit()
     sys.exit()
-
 
 
 start_time = time.time()
