@@ -45,6 +45,7 @@ Optional arguments
 | -gr', '--groupretry | retry count while recapturing group names |
 | -dg', '--dumpgroups | do not leave groups; only dump group names to a file |
 | -v, --version | show program's version number and exit |
+| -h, --help | show help message and exit |
 
 ## Usage
 **To leave all groups**
