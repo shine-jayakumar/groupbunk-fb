@@ -30,43 +30,50 @@ View the [requirements.txt](https://github.com/shine-jayakumar/Rubber-Price-Tele
 pip install -r requirements.txt
 ```
 ## Options
+Required arguments
+| Arguments | Description |
+| ------ | ------ |
+| username | Facebook username |
+| password | Facebook password |
+
+Optional arguments
 | Option | Description |
 | ------ | ------ |
-| -u | Facebook username |
-| -p | Facebook password |
-| -exgrp | filename containing line separated group names to exclude (optional) |
-| -elloadto | max timeout for elements to be loaded (optional) |
-| -grloadto | time to wait after each scroll (optional) |
-| -maxret | max number of retries while recapturing group names (optional) |
-| -dumpgrps | Only dumps group names into a file (optional) |
+| -eg', '--exgroups | file with group names to exclude (one group per line) |
+| -et', '--eltimeout | max timeout for elements to be loaded |
+| -sw', '--scrollwait | time to wait after each scroll |
+| -gr', '--groupretry | retry count while recapturing group names |
+| -dg', '--dumpgroups | do not leave groups; only dump group names to a file |
 
 ## Usage
 **To leave all groups**
 
 ```
-groupbunk.py -u <username> -p <password>
+groupbunk.py username password
 ```
     
 **To view all groups you're member of**
 ```
-groupbunk.py -u <username> -p <password> -dumpgrps <filename>
+groupbunk.py username password --dumpgroups filename
 ```
     
 **To specify groups you don't want to leave**
 ```
-groupbunk.py -u <username> -p <password> -exgrp <file_with_groupnames>
+groupbunk.py username password --exgroups filename
 ```
-*Only one group name per line is allowed* 
     
 ## Examples
 ```
-python groupbunk.py -u somerandomchuck01@email.com -p randomchuckspASSwrD02
+groupbunk.py bob101@email.com bobspassword101
 ```
 ```
-python groupbunk.py -u somerandomchuck01@email.com -p randomchuckspASSwrD02 -dumpgrps mygroups.txt
+groupbunk.py bob101@email.com bobspassword101 -eg keepgroups.txt
 ```
 ```
-python groupbunk.py -u somerandomchuck01@email.com -p randomchuckspASSwrD02 -exgrp groupstokeep.txt
+groupbunk.py bob101@email.com bobspassword101 -et 60 --scrollwait 10 -gr 7
+```
+```
+groupbunk.py bob101@email.com bobspassword101 --dumpgroups mygroup.txt --groupretry 5
 ```
 ## LICENSE
 [MIT](https://github.com/shine-jayakumar/groupbunk-fb/blob/master/LICENSE)
